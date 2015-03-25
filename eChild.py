@@ -14,7 +14,8 @@ def index(listP, value):
         return i
     except ValueError:
         return -1
-    
+
+#Returns the index of value in the list, in this case it can find the value as a substring in the index of the list    
 def first_substring(listP, value):
     return next((i for i, string in enumerate(listP) if value in string),-1)
     
@@ -25,7 +26,6 @@ def first_substring(listP, value):
 class Child(object):
     
     def __init__(self):
-        
         #This boolean is False unless the function checkIfLearned sets it to True (which happens when the grammar is acquired). The main program will while-loop until
         #grammarLearned == True
         self.grammarLearned = False
@@ -33,7 +33,7 @@ class Child(object):
         #in time sits the number of sentences (discrete time units) the echild has been exposed to at the current time
         self.time = 0
         
-        self.grammar = "0 0 0 0 0 0 0 0 0 0 0 0 0".split()
+        self.grammar = "0 0 0 0 0 0 1 0 0 0 0 0 0".split()
     
     #This function will set the current information about the sentence and the sentence itself for the child
     def setInfo(self, info):
@@ -61,10 +61,13 @@ class Child(object):
     def outOblique(self):
         temp = self.infoList[2].split()
         i = first_substring(temp,"O1")
-        j = first_substring(temp,"O2")
+        j = first_substring(temp,"O2") 
         k = first_substring(temp,"P O3")
-        print i,j,k
+        l = first_substring(temp,"O3 P")
+
         if i != -1 and j != -1 and k != -1 and i < j < k:  
+            return False
+        elif i != -1 and j != -1 and l != -1 and l < j < i:
             return False
         return True
         
@@ -137,7 +140,7 @@ class Child(object):
             temp = self.infoList[2].split()
             i = first_substring(temp,"P") #Get index of P
             j = first_substring(temp,"O3")#Get index of O3
-            if i != -1 and j != -1 and abs(i - j) != 1 : #If they exist, make sure they arent adjacent
+            if i != -1 and j != -1 and abs(i - j) != 1 : #If they exist, make sure they aren't adjacent
                 self.grammar[7] = '1'  
     
     
@@ -176,7 +179,7 @@ class Child(object):
 ######################## MAIN #########################
 #######################################################
 
-infoFile = open('/Users/JohnnyXD1/Desktop/RESEARCH/french.txt','rU') # 0001001100011
+infoFile = open('/Users/JohnnyXD1/Desktop/RESEARCH/german.txt','rU') # 0001001100011
 sentenceInfo = infoFile.readlines()
 infoFile.close()
 #print ''.join('v{}: {}'.format(v, i) for v, i in enumerate(sentenceInfo))
@@ -188,7 +191,7 @@ while eChild.grammarLearned == False :
     eChild.setInfo(random.choice(sentenceInfo))
     print eChild.infoList
     eChild.setParameters()
-    if count == 600:
+    if count == 10000:
         eChild.grammarLearned = True
     count+=1
 print eChild.grammar
