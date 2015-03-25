@@ -132,7 +132,7 @@ class Child(object):
     #7th parameter
     def setWHMovement(self):
         if first_substring(self.infoList[2].split(), "+WH") > 0:
-            self.grammar[6] = '1'
+            self.grammar[6] = '0'
                 
     #8th parameter
     def setPrepStrand(self):
@@ -179,7 +179,7 @@ class Child(object):
 ######################## MAIN #########################
 #######################################################
 
-infoFile = open('/Users/JohnnyXD1/Desktop/RESEARCH/german.txt','rU') # 0001001100011
+infoFile = open('/Users/JohnnyXD1/Desktop/RESEARCH/french.txt','rU') # 0001001100011
 sentenceInfo = infoFile.readlines()
 infoFile.close()
 #print ''.join('v{}: {}'.format(v, i) for v, i in enumerate(sentenceInfo))
