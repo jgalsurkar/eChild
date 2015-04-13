@@ -1,3 +1,4 @@
+
 import random
 import pickle
 
@@ -58,6 +59,18 @@ class Child(object):
             return True
         return False
     
+    def containsTopicalizable(self):
+        temp = self.infoList[2].split()
+        i = first_substring(temp,"S")
+        j = first_substring(temp,"O1")
+        k = first_substring(temp,"O2") 
+        l= first_substring(temp,"O3")
+        m = first_substring(temp,"Adv")
+        
+        if i == 0 or j == 0 or k == 0 or l == 0 or m == 0 :
+            return True
+        return False
+    
     def outOblique(self):
         temp = self.infoList[2].split()
         i = first_substring(temp,"O1")
@@ -69,14 +82,15 @@ class Child(object):
             return False
         elif i != -1 and j != -1 and l != -1 and l < j < i:
             return False
-        return True
+        elif (i != -1 and j != -1 and l != -1) or (i != -1 and j != -1 and k != -1):
+            return True
         
         
     def setParameters(self):
         self.setSubjPos()    #Parameter 1
         self.setHead()       #Parameter 2
         self.setHeadCP()     #Parameter 3
-        #Parameter 4 - Obligatory Topic : Problem parameter
+        self.setObligTopic() #Parameter 4 - Obligatory Topic : Problem parameter
         self.setNullSubj()   #Parameter 5
         self.setNullTopic()  #Parameter 6
         self.setWHMovement() #Parameter 7
@@ -116,6 +130,17 @@ class Child(object):
             if index(temp, "ka") == len(temp)-1 or ("ka" not in temp and index(temp, "Aux") == len(temp)-1):
                 self.grammar[2] = '1'
                 
+    #4th parameter
+    def setObligTopic(self):
+        if self.isDeclarative():
+            if "O2" in self.infoList[2] and "O1" not in self.infoList[2] :
+                self.grammar[5] = '1'
+                if self.grammar[3] == '1':
+                    self.grammar[3] = '0'
+            else:
+                if(self.containsTopicalizable()) :
+                    print self.containsTopicalizable()
+                    self.grammar[3] = '1'
                 
     #5th parameter
     #Only works for full, not necessarily with CHILDES distribution
@@ -161,9 +186,9 @@ class Child(object):
     
     #12th parameter
     def affixHop(self):
-        if "Never Verb O1" in self.infoList[2]:
+        if "Never Verb[+FIN] O1" in self.infoList[2]:
             self.grammar[11] = 1
-        if first_substring(self.infoList[2].split(), "O1") > 0 and "O1 Verb Never" in self.infoList[2]:
+        if first_substring(self.infoList[2].split(), "O1") > 0 and "O1 Verb[+FIN] Never" in self.infoList[2]:
             self.grammar[11] = 1
     
 
@@ -179,7 +204,7 @@ class Child(object):
 ######################## MAIN #########################
 #######################################################
 
-infoFile = open('/Users/JohnnyXD1/Desktop/RESEARCH/french.txt','rU') # 0001001100011
+infoFile = open('/Users/JohnnyXD1/Desktop/RESEARCH/japREPLACE.txt','rU') # 0001001100011
 sentenceInfo = infoFile.readlines()
 infoFile.close()
 #print ''.join('v{}: {}'.format(v, i) for v, i in enumerate(sentenceInfo))
@@ -191,11 +216,38 @@ while eChild.grammarLearned == False :
     eChild.setInfo(random.choice(sentenceInfo))
     print eChild.infoList
     eChild.setParameters()
-    if count == 10000:
+    if count == 1000:
         eChild.grammarLearned = True
     count+=1
 print eChild.grammar
-    
+
+  
+testFile = open('/Users/JohnnyXD1/Desktop/RESEARCH/japTEST.txt')
+outFile =  open('/Users/JohnnyXD1/Desktop/RESEARCH/japREPLACE.txt', 'w')
+
+replacements = {'Verb':'Verb[-FIN]', 'Aux':'Aux[+FIN]'}
+for line in testFile:
+    for src, target in replacements.iteritems():
+        if ('DEC' in line or 'Q' in line) and 'Aux' not in line and "+FIN" not in line:
+            line = line.replace('Verb', 'Verb[+FIN]')
+        outFile.write(line)
+testFile.close()
+outFile.close()
+
+'''
+infile = open('path/to/input/file')
+outfile = open('path/to/output/file', 'w')
+
+replacements = {'zero':'0', 'temp':'bob', 'garbage':'nothing'}
+
+for line in infile:
+    for src, target in replacements.iteritems():
+        line = line.replace(src, target)
+    outfile.write(line)
+infile.close()
+outfile.close()
+'''
+
 
 
 errFile = open('/Users/JohnnyXD1/Desktop/RESEARCH/Statistics/error.txt','w')
