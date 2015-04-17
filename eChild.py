@@ -42,6 +42,7 @@ class Child(object):
         info = info.replace('\n','')
         info = info.replace('\"','')
         self.infoList =  info.rsplit("\t",3)
+        self.sentence = self.infoList[2].split()
         
         
     def isQuestion(self):
@@ -60,23 +61,21 @@ class Child(object):
         return False
     
     def containsTopicalizable(self):
-        temp = self.infoList[2].split()
-        i = first_substring(temp,"S")
-        j = first_substring(temp,"O1")
-        k = first_substring(temp,"O2") 
-        l= first_substring(temp,"O3")
-        m = first_substring(temp,"Adv")
+        i = first_substring(self.sentence,"S")
+        j = first_substring(self.sentence,"O1")
+        k = first_substring(self.sentence,"O2") 
+        l= first_substring(self.sentence,"O3")
+        m = first_substring(self.sentence,"Adv")
         
         if i == 0 or j == 0 or k == 0 or l == 0 or m == 0 :
             return True
         return False
     
     def outOblique(self):
-        temp = self.infoList[2].split()
-        i = first_substring(temp,"O1")
-        j = first_substring(temp,"O2") 
-        k = first_substring(temp,"P")
-        l = first_substring(temp,"O3")
+        i = first_substring(self.sentence,"O1")
+        j = first_substring(self.sentence,"O2") 
+        k = first_substring(self.sentence,"P")
+        l = first_substring(self.sentence,"O3")
 
         if i != -1 and j != -1 and k != -1 and (i < j < k and l == k+1):  
             return False
@@ -105,29 +104,26 @@ class Child(object):
     #1st parameter
     def setSubjPos(self):
         if "O1" in self.infoList[2] and "S" in self.infoList[2]: #Check if O1 and S are in the sentence
-            temp = self.infoList[2].split()
-            first = first_substring(temp,"01") #Find index of O1
-            if first > 0 and first < first_substring(temp,"S"): # Make sure O1 is non-sentence-initial and before S
+            first = first_substring(self.sentence,"01") #Find index of O1
+            if first > 0 and first < first_substring(self.sentence,"S"): # Make sure O1 is non-sentence-initial and before S
                 self.grammar[0] = '1'
                 
     #2nd parameter
     def setHead(self):
-        temp = self.infoList[2].split()
         if "O3" in self.infoList[2] and "P" in self.infoList[2]:
-            first = first_substring(temp,"O3")
-            if first > 0 and first_substring(temp,"P") == first + 1: #O3 followed by P
+            first = first_substring(self.sentence,"O3")
+            if first > 0 and first_substring(self.sentence,"P") == first + 1: #O3 followed by P
                 self.grammar[1] = '1'
         #If imperative, make sure Verb directly follows O1
         if self.isImperative() and "O1" in self.infoList[2] and "Verb" in self.infoList[2]:
-            if first_substring(temp, "O1") == first_substring(temp, "Verb") - 1:
+            if first_substring(self.sentence, "O1") == first_substring(self.sentence, "Verb") - 1:
                 self.grammar[1] = '1'
                 
                 
     #3rd parameter 
     def setHeadCP(self):
-        temp = self.infoList[2].split()
         if(self.isQuestion()):
-            if index(temp, "ka") == len(temp)-1 or ("ka" not in temp and index(temp, "Aux") == len(temp)-1):
+            if index(self.sentence, "ka") == len(self.sentence)-1 or ("ka" not in self.sentence and index(self.sentence, "Aux") == len(self.sentence)-1):
                 self.grammar[2] = '1'
                 
     #4th parameter
@@ -140,13 +136,11 @@ class Child(object):
                         self.grammar[3] = '0'
                 else:
                     if(self.containsTopicalizable()) :
-                       # print self.containsTopicalizable()
                         self.grammar[3] = '1'
                 
     #5th parameter
     #Only works for full, not necessarily with CHILDES distribution
     def setNullSubj(self):
-        
         if self.isDeclarative() and "S" not in self.infoList[2] and self.outOblique():
             self.grammar[4] = '1'
             print self.grammar[4]
@@ -158,15 +152,14 @@ class Child(object):
     
     #7th parameter
     def setWHMovement(self):
-        if first_substring(self.infoList[2].split(), "+WH") > 0 and "O3[+WH]" not in self.infoList[2]:
+        if first_substring(self.sentence, "+WH") > 0 and "O3[+WH]" not in self.infoList[2]:
             self.grammar[6] = '0'
                 
     #8th parameter
     def setPrepStrand(self):
         if "P" in self.infoList[2] and "O3" in self.infoList[2] :
-            temp = self.infoList[2].split()
-            i = first_substring(temp,"P") #Get index of P
-            j = first_substring(temp,"O3")#Get index of O3
+            i = first_substring(self.sentence,"P") #Get index of P
+            j = first_substring(self.sentence,"O3")#Get index of O3
             if i != -1 and j != -1 and abs(i - j) != 1 : #If they exist, make sure they aren't adjacent
                 self.grammar[7] = '1'  
     
@@ -179,9 +172,8 @@ class Child(object):
     #10th parameter
     def vToI(self):
         if "O1" in self.infoList[2] and "Verb" in self.infoList[2] :
-            temp = self.infoList[2].split()
-            i = first_substring(temp,"O1")
-            j = first_substring(temp,"Verb")
+            i = first_substring(self.sentence,"O1")
+            j = first_substring(self.sentence,"Verb")
             if i > 0 and j != -1 and abs(i - j) != 1 :
                 self.grammar[9] = '1' 
             
@@ -190,7 +182,7 @@ class Child(object):
     def affixHop(self):
         if "Never Verb[+FIN] O1" in self.infoList[2]:
             self.grammar[11] = 1
-        if first_substring(self.infoList[2].split(), "O1") > 0 and "O1 Verb[+FIN] Never" in self.infoList[2]:
+        if first_substring(self.sentence, "O1") > 0 and "O1 Verb[+FIN] Never" in self.infoList[2]:
             self.grammar[11] = 1
     
 
@@ -206,7 +198,7 @@ class Child(object):
 ######################## MAIN #########################
 #######################################################
 
-infoFile = open('/Users/JohnnyXD1/Desktop/RESEARCH/german.txt','rU') # 0001001100011
+infoFile = open('/Users/JohnnyXD1/Desktop/RESEARCH/french.txt','rU') # 0001001100011
 sentenceInfo = infoFile.readlines()
 infoFile.close()
 #print ''.join('v{}: {}'.format(v, i) for v, i in enumerate(sentenceInfo))
