@@ -132,15 +132,16 @@ class Child(object):
                 
     #4th parameter
     def setObligTopic(self):
-        if self.isDeclarative():
-            if "O2" in self.infoList[2] and "O1" not in self.infoList[2] :
-                self.grammar[5] = '1'
-                if self.grammar[3] == '1':
-                    self.grammar[3] = '0'
-            else:
-                if(self.containsTopicalizable()) :
-                   # print self.containsTopicalizable()
-                    self.grammar[3] = '1'
+        if not (self.grammar[3] == '0' and self.grammar[5] == '1'):
+            if self.isDeclarative():
+                if "O2" in self.infoList[2] and "O1" not in self.infoList[2] :
+                    self.grammar[5] = '1'
+                    if self.grammar[3] == '1':
+                        self.grammar[3] = '0'
+                else:
+                    if(self.containsTopicalizable()) :
+                       # print self.containsTopicalizable()
+                        self.grammar[3] = '1'
                 
     #5th parameter
     #Only works for full, not necessarily with CHILDES distribution
