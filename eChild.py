@@ -75,14 +75,14 @@ class Child(object):
         temp = self.infoList[2].split()
         i = first_substring(temp,"O1")
         j = first_substring(temp,"O2") 
-        k = first_substring(temp,"P O3")
-        l = first_substring(temp,"O3 P")
+        k = first_substring(temp,"P")
+        l = first_substring(temp,"O3")
 
-        if i != -1 and j != -1 and k != -1 and i < j < k:  
+        if i != -1 and j != -1 and k != -1 and (i < j < k and l == k+1):  
             return False
-        elif i != -1 and j != -1 and l != -1 and l < j < i:
+        elif i != -1 and j != -1 and k != -1 and ( l < j < i and k == l+1):
             return False
-        elif (i != -1 and j != -1 and l != -1) or (i != -1 and j != -1 and k != -1):
+        elif (i != -1 and j != -1 and k != -1 and l != -1):
             return True
         
         
@@ -139,15 +139,16 @@ class Child(object):
                     self.grammar[3] = '0'
             else:
                 if(self.containsTopicalizable()) :
-                    print self.containsTopicalizable()
+                   # print self.containsTopicalizable()
                     self.grammar[3] = '1'
                 
     #5th parameter
     #Only works for full, not necessarily with CHILDES distribution
     def setNullSubj(self):
+        
         if self.isDeclarative() and "S" not in self.infoList[2] and self.outOblique():
-            print self.outOblique()
             self.grammar[4] = '1'
+            print self.grammar[4]
 
     #6th parameter   
     def setNullTopic(self):
@@ -156,7 +157,7 @@ class Child(object):
     
     #7th parameter
     def setWHMovement(self):
-        if first_substring(self.infoList[2].split(), "+WH") > 0:
+        if first_substring(self.infoList[2].split(), "+WH") > 0 and "O3[+WH]" not in self.infoList[2]:
             self.grammar[6] = '0'
                 
     #8th parameter
@@ -204,7 +205,7 @@ class Child(object):
 ######################## MAIN #########################
 #######################################################
 
-infoFile = open('/Users/JohnnyXD1/Desktop/RESEARCH/japREPLACE.txt','rU') # 0001001100011
+infoFile = open('/Users/JohnnyXD1/Desktop/RESEARCH/german.txt','rU') # 0001001100011
 sentenceInfo = infoFile.readlines()
 infoFile.close()
 #print ''.join('v{}: {}'.format(v, i) for v, i in enumerate(sentenceInfo))
@@ -221,7 +222,7 @@ while eChild.grammarLearned == False :
     count+=1
 print eChild.grammar
 
-  
+'''
 testFile = open('/Users/JohnnyXD1/Desktop/RESEARCH/japTEST.txt')
 outFile =  open('/Users/JohnnyXD1/Desktop/RESEARCH/japREPLACE.txt', 'w')
 
@@ -233,6 +234,7 @@ for line in testFile:
         outFile.write(line)
 testFile.close()
 outFile.close()
+'''
 
 '''
 infile = open('path/to/input/file')
