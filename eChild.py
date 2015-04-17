@@ -86,18 +86,29 @@ class Child(object):
         
         
     def setParameters(self):
-        self.setSubjPos()    #Parameter 1
-        self.setHead()       #Parameter 2
-        self.setHeadCP()     #Parameter 3
-        self.setObligTopic() #Parameter 4 - Obligatory Topic : Problem parameter
-        self.setNullSubj()   #Parameter 5
-        self.setNullTopic()  #Parameter 6
-        self.setWHMovement() #Parameter 7
-        self.setPrepStrand() #Parameter 8
-        self.setTopicMark()  #Parameter 9
-        self.vToI()          #Parameter 10
+        if self.grammar[0] == '0':
+            self.setSubjPos()    #Parameter 1
+        if self.grammar[1] == '0':
+            self.setHead()       #Parameter 2
+        if self.grammar[2] == '0':
+            self.setHeadCP()     #Parameter 3
+        if not (self.grammar[3] == '0' and self.grammar[5] == '1'):
+            self.setObligTopic() #Parameter 4 - Obligatory Topic : Problem parameter
+        if self.grammar[4] == '0':
+            self.setNullSubj()   #Parameter 5
+        if self.grammar[5] == '0':
+            self.setNullTopic()  #Parameter 6
+        if self.grammar[6] == '1':
+            self.setWHMovement() #Parameter 7
+        if self.grammar[7] == '0':
+            self.setPrepStrand() #Parameter 8
+        if self.grammar[8] == '0':
+            self.setTopicMark()  #Parameter 9
+        if self.grammar[9] == '0':
+            self.vToI()          #Parameter 10
         #Parameter 11 - I to C movement : Problem parameter
-        self.affixHop()      #Parameter 12
+        if self.grammar[11] == '0':
+            self.affixHop()      #Parameter 12
         #Parameter 13 - Question Inversion : Problem parameter
         
         
@@ -128,15 +139,14 @@ class Child(object):
                 
     #4th parameter
     def setObligTopic(self):
-        if not (self.grammar[3] == '0' and self.grammar[5] == '1'):
-            if self.isDeclarative():
-                if "O2" in self.infoList[2] and "O1" not in self.infoList[2] :
-                    self.grammar[5] = '1'
-                    if self.grammar[3] == '1':
-                        self.grammar[3] = '0'
-                else:
-                    if(self.containsTopicalizable()) :
-                        self.grammar[3] = '1'
+        if self.isDeclarative():
+            if "O2" in self.infoList[2] and "O1" not in self.infoList[2] :
+                self.grammar[5] = '1'
+                if self.grammar[3] == '1':
+                    self.grammar[3] = '0'
+            else:
+                if(self.containsTopicalizable()) :
+                    self.grammar[3] = '1'
                 
     #5th parameter
     #Only works for full, not necessarily with CHILDES distribution
