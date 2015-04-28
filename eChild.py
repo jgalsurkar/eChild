@@ -1,4 +1,4 @@
-
+import time
 import random
 import pickle
 
@@ -19,6 +19,9 @@ def index(listP, value):
 #Returns the index of value in the list, in this case it can find the value as a substring in the index of the list    
 def first_substring(listP, value):
     return next((i for i, string in enumerate(listP) if value in string),-1)
+
+get_bin = lambda x, n: x >= 0 and str(bin(x))[2:].zfill(n) or "-" + str(bin(x))[3:].zfill(n)
+
     
 #######################################################
 ################# Child Class #########################
@@ -33,16 +36,17 @@ class Child(object):
         
         #in time sits the number of sentences (discrete time units) the echild has been exposed to at the current time
         self.time = 0
-        
-        self.grammar = "0 0 0 0 0 0 1 0 0 0 0 0 0".split()
+
+        self.grammar = "0 0 0 0 0 0 1 0 0 0 0 0 1".split()
     
     #This function will set the current information about the sentence and the sentence itself for the child
     def setInfo(self, info):
-
         info = info.replace('\n','')
         info = info.replace('\"','')
         self.infoList =  info.rsplit("\t",3)
         self.sentence = self.infoList[2].split()
+        self.expectedGrammar = " ".join(get_bin(int(self.infoList[0]),13)).split()
+        self.time += 1
         
         
     def isQuestion(self):
@@ -110,8 +114,12 @@ class Child(object):
         if self.grammar[11] == '0':
             self.affixHop()      #Parameter 12
         #Parameter 13 - Question Inversion : Problem parameter
+        if self.grammar[12] == '1':
+            self.questionInver()
         
-        
+        if(self.grammar == self.expectedGrammar):
+            self.grammarLearned = True
+               
     #1st parameter
     def setSubjPos(self):
         if "O1" in self.infoList[2] and "S" in self.infoList[2]: #Check if O1 and S are in the sentence
@@ -191,9 +199,14 @@ class Child(object):
     #12th parameter
     def affixHop(self):
         if "Never Verb[+FIN] O1" in self.infoList[2]:
-            self.grammar[11] = 1
+            self.grammar[11] = '1'
         if first_substring(self.sentence, "O1") > 0 and "O1 Verb[+FIN] Never" in self.infoList[2]:
-            self.grammar[11] = 1
+            self.grammar[11] = '1'
+    
+    #13th parameter
+    def questionInver(self):
+        if "ka" in self.infoList[2]:
+            self.grammar[12] = '0'
     
 
                 
@@ -202,64 +215,40 @@ class Child(object):
 #######################################################
 
 
-
-
 #######################################################
 ######################## MAIN #########################
 #######################################################
-
-infoFile = open('/Users/JohnnyXD1/Desktop/RESEARCH/french.txt','rU') # 0001001100011
-sentenceInfo = infoFile.readlines()
-infoFile.close()
-#print ''.join('v{}: {}'.format(v, i) for v, i in enumerate(sentenceInfo))
-eChild = Child()
-
-count = 0
-
-while eChild.grammarLearned == False :
-    eChild.setInfo(random.choice(sentenceInfo))
-    print eChild.infoList
-    eChild.setParameters()
-    if count == 1000:
-        eChild.grammarLearned = True
-    count+=1
-print eChild.grammar
-
-'''
-testFile = open('/Users/JohnnyXD1/Desktop/RESEARCH/japTEST.txt')
-outFile =  open('/Users/JohnnyXD1/Desktop/RESEARCH/japREPLACE.txt', 'w')
-
-replacements = {'Verb':'Verb[-FIN]', 'Aux':'Aux[+FIN]'}
-for line in testFile:
-    for src, target in replacements.iteritems():
-        if ('DEC' in line or 'Q' in line) and 'Aux' not in line and "+FIN" not in line:
-            line = line.replace('Verb', 'Verb[+FIN]')
-        outFile.write(line)
-testFile.close()
-outFile.close()
-'''
-
-'''
-infile = open('path/to/input/file')
-outfile = open('path/to/output/file', 'w')
-
-replacements = {'zero':'0', 'temp':'bob', 'garbage':'nothing'}
-
-for line in infile:
-    for src, target in replacements.iteritems():
-        line = line.replace(src, target)
-    outfile.write(line)
-infile.close()
-outfile.close()
-'''
-
-
-
-errFile = open('/Users/JohnnyXD1/Desktop/RESEARCH/Statistics/error.txt','w')
-
-errFile.close()
-
+def main():
+    infoFile = open('/Users/JohnnyXD1/Desktop/RESEARCH/japanese.txt','rU') # 0001001100011
+    sentenceInfo = infoFile.readlines()
+    infoFile.close()
+    #print ''.join('v{}: {}'.format(v, i) for v, i in enumerate(sentenceInfo))
+    eChild = Child()
+    
+    count = 0
+    
+    while eChild.grammarLearned == False :
+        eChild.setInfo(random.choice(sentenceInfo))
+        print eChild.infoList
+        eChild.setParameters()
+        if count == 1000:
+            eChild.grammarLearned = True
+        count+=1
+    print eChild.grammar
+    print eChild.expectedGrammar
+    print eChild.time
+    
+    
+    errFile = open('/Users/JohnnyXD1/Desktop/RESEARCH/Statistics/error.txt','w')
+    errFile.write("Japanese: " + str(eChild.time))
+    errFile.close()
+    
 ###########################################################
 ######################## End MAIN #########################
 ###########################################################
 
+if __name__ == '__main__':
+    start = time.time() 
+    main()
+    end = time.time() - start
+    print "Time to complete:", end
