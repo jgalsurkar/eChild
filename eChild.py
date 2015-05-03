@@ -37,7 +37,7 @@ class Child(object):
         #in time sits the number of sentences (discrete time units) the echild has been exposed to at the current time
         self.time = 0
 
-        self.grammar = "2 2 2 0 0 0 1 0 0 0 0 0 1".split()
+        self.grammar = "2 2 2 0 0 0 1 0 0 0 1 0 1".split()
     
     #This function will set the current information about the sentence and the sentence itself for the child
     def setInfo(self, info):
@@ -118,13 +118,13 @@ class Child(object):
             return True
         return False
     
-    def Never_Verb(self):
+    def Verb_Never(self):
         if self.isDeclarative() and (first_substring(self.sentence, "Verb") == first_substring(self.sentence, "Never") - 1) and "Aux" not in self.sentence:
             return True
         return False
     
     def hasKa(self):
-        if "ka" in sentence:
+        if "ka" in self.sentence:
             return True
         return False
     
@@ -160,6 +160,8 @@ class Child(object):
         if self.grammar[9] == '0':
             self.vToI()          #Parameter 10
         #Parameter 11 - I to C movement : Problem parameter
+        if self.grammar[10] == '1':
+            self.iToC()
         if self.grammar[11] == '0':
             self.affixHop()      #Parameter 12
         #Parameter 13 - Question Inversion : Problem parameter
@@ -263,7 +265,25 @@ class Child(object):
             j = first_substring(self.sentence,"Verb")
             if i > 0 and j != -1 and abs(i - j) != 1 :
                 self.grammar[9] = '1' 
-            
+               
+    #11th parameter
+    def iToC(self):
+        if self.grammar[0] == '0' and self.grammar[1] == '0' and self.grammar[2] == '0' and self.S_Aux():
+            self.grammar[10] = '0'
+        if self.grammar[0] == '1' and self.grammar[1] == '1' and self.grammar[2] == '1' and self.Aux_S():
+            self.grammar[10] = '0'
+        if self.grammar[0] == '1' and self.grammar[1] == '0' and self.grammar[2] == '1' and self.Aux_Verb():
+            self.grammar[10] = '0'
+        if self.grammar[0] == '0' and self.grammar[1] == '1' and self.grammar[2] == '0' and self.Verb_Aux():
+            self.grammar[10] = '0'
+        if self.grammar[0] == '0' and self.grammar[1] == '0' and self.grammar[2] == '1' and self.S_Aux():
+            self.grammar[10] = '0'
+        if self.grammar[0] == '1' and self.grammar[1] == '1' and self.grammar[2] == '0' and self.Aux_S():
+            self.grammar[10] = '0'
+        if self.grammar[0] == '1' and self.grammar[1] == '0' and self.grammar[2] == '0' and (self.Never_Verb() or self.hasKa()):
+            self.grammar[10] = '0'
+        if self.grammar[0] == '0' and self.grammar[1] == '1' and self.grammar[2] == '1' and (self.Verb_Never() or self.hasKa()):
+            self.grammar[10] = '0'
     
     #12th parameter
     def affixHop(self):
