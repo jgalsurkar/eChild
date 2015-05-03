@@ -87,8 +87,48 @@ class Child(object):
             return False
         elif (i != -1 and j != -1 and k != -1 and l != -1):
             return True
-        
-        
+    
+    
+    def S_Aux(self):
+        if self.isDeclarative():
+            i = first_substring(self.sentence, "S")
+            if i > 0 and first_substring(self.sentence, "Aux") == i + 1:
+                return True
+        return False
+            
+    def Aux_S(self):
+        if self.isDeclarative():
+            i = first_substring(self.sentence, "Aux")
+            if i > 0 and first_substring(self.sentence, "S") == i + 1:
+                return True
+        return False
+    
+    def Aux_Verb(self):
+        if self.isDeclarative() and (first_substring(self.sentence, "Aux") == first_substring(self.sentence, "Verb") - 1):
+            return True
+        return False
+    
+    def Verb_Aux(self):
+        if self.isDeclarative() and (first_substring(self.sentence, "Verb") == first_substring(self.sentence, "Aux") - 1):
+            return True
+        return False
+    
+    def Never_Verb(self):
+        if self.isDeclarative() and (first_substring(self.sentence, "Never") == first_substring(self.sentence, "Verb") - 1) and "Aux" not in self.sentence:
+            return True
+        return False
+    
+    def Never_Verb(self):
+        if self.isDeclarative() and (first_substring(self.sentence, "Verb") == first_substring(self.sentence, "Never") - 1) and "Aux" not in self.sentence:
+            return True
+        return False
+    
+    def hasKa(self):
+        if "ka" in sentence:
+            return True
+        return False
+    
+    
     def setParameters(self):
         if self.grammar[0] == '2':
             self.noSubjPos()
