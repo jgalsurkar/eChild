@@ -37,7 +37,7 @@ class Child(object):
         #in time sits the number of sentences (discrete time units) the echild has been exposed to at the current time
         self.time = 0
 
-        self.grammar = "0 0 0 0 0 0 1 0 0 0 0 0 1".split()
+        self.grammar = "2 2 2 0 0 0 1 0 0 0 0 0 1".split()
     
     #This function will set the current information about the sentence and the sentence itself for the child
     def setInfo(self, info):
@@ -90,12 +90,21 @@ class Child(object):
         
         
     def setParameters(self):
-        if self.grammar[0] == '0':
+        if self.grammar[0] == '2':
+            self.noSubjPos()
+        if self.grammar[0] != '1':
             self.setSubjPos()    #Parameter 1
-        if self.grammar[1] == '0':
+        
+        if self.grammar[1] == '2':
+            self.noHead()  
+        if self.grammar[1] != '1':
             self.setHead()       #Parameter 2
-        if self.grammar[2] == '0':
+
+        if self.grammar[2] == '2':
+            self.noHeadCP()    
+        if self.grammar[2] != '1':
             self.setHeadCP()     #Parameter 3
+            
         if not (self.grammar[3] == '0' and self.grammar[5] == '1'):
             self.setObligTopic() #Parameter 4 - Obligatory Topic : Problem parameter
         if self.grammar[4] == '0':
@@ -123,10 +132,16 @@ class Child(object):
     #1st parameter
     def setSubjPos(self):
         if "O1" in self.infoList[2] and "S" in self.infoList[2]: #Check if O1 and S are in the sentence
-            first = first_substring(self.sentence,"01") #Find index of O1
+            first = first_substring(self.sentence,"O1") #Find index of O1
             if first > 0 and first < first_substring(self.sentence,"S"): # Make sure O1 is non-sentence-initial and before S
                 self.grammar[0] = '1'
                 
+    def noSubjPos(self):
+        if "O1" in self.infoList[2] and "S" in self.infoList[2]: #Check if O1 and S are in the sentence
+            first = first_substring(self.sentence,"S") #Find index of O1
+            if first >= 0 and first < first_substring(self.sentence,"O1"): # Make sure O1 is non-sentence-initial and before S
+                self.grammar[0] = '0'
+    
     #2nd parameter
     def setHead(self):
         if "O3" in self.infoList[2] and "P" in self.infoList[2]:
@@ -137,13 +152,27 @@ class Child(object):
         if self.isImperative() and "O1" in self.infoList[2] and "Verb" in self.infoList[2]:
             if first_substring(self.sentence, "O1") == first_substring(self.sentence, "Verb") - 1:
                 self.grammar[1] = '1'
-                
+    
+    def noHead(self):
+        if "O3" in self.infoList[2] and "P" in self.infoList[2]:
+            first = first_substring(self.sentence,"P")
+            if first > 0 and first_substring(self.sentence,"O3") == first + 1: #O3 followed by P
+                self.grammar[1] = '0'
+        #If imperative, make sure Verb directly follows O1
+        if self.isImperative() and "O1" in self.infoList[2] and "Verb" in self.infoList[2]:
+            if first_substring(self.sentence, "Verb") == first_substring(self.sentence, "O1") - 1:
+                self.grammar[1] = '0'    
                 
     #3rd parameter 
     def setHeadCP(self):
         if(self.isQuestion()):
             if index(self.sentence, "ka") == len(self.sentence)-1 or ("ka" not in self.sentence and index(self.sentence, "Aux") == len(self.sentence)-1):
                 self.grammar[2] = '1'
+    
+    def noHeadCP(self):
+        if(self.isQuestion()):
+            if index(self.sentence, "ka") == 0 or ("ka" not in self.sentence and index(self.sentence, "Aux") == 0):
+                self.grammar[2] = '0'
                 
     #4th parameter
     def setObligTopic(self):
@@ -219,7 +248,7 @@ class Child(object):
 ######################## MAIN #########################
 #######################################################
 def main():
-    infoFile = open('/Users/JohnnyXD1/Desktop/RESEARCH/japanese.txt','rU') # 0001001100011
+    infoFile = open('/Users/JohnnyXD1/Desktop/RESEARCH/french.txt','rU') # 0001001100011
     sentenceInfo = infoFile.readlines()
     infoFile.close()
     #print ''.join('v{}: {}'.format(v, i) for v, i in enumerate(sentenceInfo))
@@ -229,7 +258,7 @@ def main():
     
     while eChild.grammarLearned == False :
         eChild.setInfo(random.choice(sentenceInfo))
-        print eChild.infoList
+       # print eChild.infoList
         eChild.setParameters()
         if count == 1000:
             eChild.grammarLearned = True
